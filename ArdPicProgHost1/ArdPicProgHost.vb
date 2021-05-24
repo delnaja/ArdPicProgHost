@@ -26,6 +26,14 @@
 
 Option Strict Off
 Option Explicit On
+' Imports System.Runtime.CompilerServices
+' Public Module MyExtensions
+' <Extension()>
+' Public Sub Add(Of T)(ByRef arr As T(), item As T)
+' Array.Resize(arr, arr.Length + 1)
+' arr(arr.Length - 1) = item
+' End Sub
+' End Module
 Friend Class frmUI_ArdPicProgHost
     Inherits System.Windows.Forms.Form
 
@@ -95,7 +103,7 @@ Friend Class frmUI_ArdPicProgHost
         ' Initialize LED
         Led1.Color = LED.LEDColorSelection.LED_Green
         Led1.Interval = 500
-        
+
         If AvailableCOMPorts.Items.Count = 0 Then
             MsgBox("No COM Port found. Program will stop.", MsgBoxStyle.OkOnly, "Error Message")
             End
@@ -270,14 +278,67 @@ Friend Class frmUI_ArdPicProgHost
         HexFileDump.Text = ""
         EEPROMDump.Text = ""
         Me.Refresh()
+        If ((lDeviceName.Text = "PIC16F627A") Or (lDeviceName.Text = "PIC16F628A") Or (lDeviceName.Text = "PIC16F648A")) Then
+            intMemAdress = intProgramStart
+            Led2.Color = LED.LEDColorSelection.LED_Red
+            ' Activate hidden memory (jump)
+            Call mySerialLink.SendDataToSerial("READ" & " " & Decimal2Hex(intMemAdress) & "-" & Decimal2Hex(intMemAdress + 1) & vbCrLf)
+            Call mySerialLink.GetResponse(strProgramMemory, "." & vbCrLf)
+            ' Read hidden memory in 8-bit mode
+            intMemAdress = intConfigStart
+            While (intMemAdress >= intConfigStart And intMemAdress <= intConfigEnd)
+                Call mySerialLink.SendDataToSerial("READ" & " " & Decimal2Hex(intMemAdress) & "-" & Decimal2Hex(intMemAdress + 7) & vbCrLf)
+                Call mySerialLink.GetResponse(strProgramMemory, "." & vbCrLf)
+                ' Added against garbage
+                If strProgramMemory <> "TimeOut" And strProgramMemory <> "ERROR" & vbCrLf Then
+                    HexFileDump.Text = HexFileDump.Text & Decimal2Hex(intMemAdress) & ": " & strProgramMemory.Substring(4, intCharsPerLine) & vbCrLf
+                    intMemAdress += 8 'address for next line
+                    intRefreshCounter += 1
+                    If intRefreshCounter = 4 Then
+                        If intUpdateWindow > 0 Then
+                            Me.HexFileDump.Refresh()
+                            intUpdateWindow -= 1
+                        End If
+                        intRefreshCounter = 0
+                        Led2.State = boolLedStatus
+                        boolLedStatus = Not boolLedStatus
+                        Status.Text = sMemMessage & Decimal2Hex(intMemAdress)
+                        Me.Led2.Refresh()
+                        Me.Status.Refresh()
+                    End If
+                Else
+                    intMemAdress += 8 'address for next line
+                    intRefreshCounter += 1
+                    If intRefreshCounter = 4 Then
+                        If intUpdateWindow > 0 Then
+                            Me.HexFileDump.Refresh()
+                            intUpdateWindow -= 1
+                        End If
+                        intRefreshCounter = 0
+                        Led2.State = boolLedStatus
+                        boolLedStatus = Not boolLedStatus
+                        Status.Text = sMemMessage & Decimal2Hex(intMemAdress)
+                        Me.Led2.Refresh()
+                        Me.Status.Refresh()
+                    End If
+                End If
+            End While
+        End If
         intMemAdress = intProgramStart
-        Led2.Color = LED.LEDColorSelection.LED_Red
         While (intMemAdress < intProgramEnd)
             Call mySerialLink.SendDataToSerial("READ" & " " & Decimal2Hex(intMemAdress) & "-" & Decimal2Hex(intMemAdress + 15) & vbCrLf)
             Call mySerialLink.GetResponse(strProgramMemory, "." & vbCrLf)
+            ' Added against garbage
+            Dim subs4 = strProgramMemory.Substring(4, intCharsPerLine)
+            Dim comparison4 As String = subs4.Replace(vbCr, "").Replace(vbLf, "")
+            Dim subs45 = strProgramMemory.Substring(45, intCharsPerLine)
+            Dim comparison45 As String = subs45.Replace(vbCr, "").Replace(vbLf, "")
             If strProgramMemory <> "TimeOut" And strProgramMemory.Length = 89 Then
-                HexFileDump.Text = HexFileDump.Text & Decimal2Hex(intMemAdress) & ": " & strProgramMemory.Substring(4, intCharsPerLine) & " "
-                HexFileDump.Text = HexFileDump.Text & strProgramMemory.Substring(45, intCharsPerLine) & vbCrLf
+                ' Added against garbage
+                If comparison4 <> "3FFF 3FFF 3FFF 3FFF 3FFF 3FFF 3FFF 3FFF" And comparison45 <> "3FFF 3FFF 3FFF 3FFF 3FFF 3FFF 3FFF 3FFF" Then
+                    HexFileDump.Text = HexFileDump.Text & Decimal2Hex(intMemAdress) & ": " & subs4 & " "
+                    HexFileDump.Text = HexFileDump.Text & subs45 & vbCrLf
+                End If
                 intMemAdress += 16 'address for next line
                 intRefreshCounter += 1
                 If intRefreshCounter = 4 Then
@@ -320,12 +381,12 @@ Friend Class frmUI_ArdPicProgHost
         Led2.Color = LED.LEDColorSelection.LED_Green
         Led2.State = True 'make sure that LED is on
     End Sub
-        Private Sub ReadButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ReadButton.Click
+    Private Sub ReadButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ReadButton.Click
         Dim strChannelBuffer As String = ""
         If boolDeviceFound Then
             Status.Text = "Reading"
             Me.Status.Refresh()
-            UpdateMemoryWindows("Reading address ", "Reading EEPROM")
+            UpdateMemoryWindows("Reading address ", "Reading EEPROM") ' Read data & EEPROM here
             Call mySerialLink.SendDataToSerial("DEVICE" & vbCrLf)
             Call mySerialLink.GetResponse(strChannelBuffer, ".")
             If ((strChannelBuffer <> "TimeOut") And Not (InStr(1, strChannelBuffer, "ERROR"))) Then 'catch ERROR conditions
@@ -453,7 +514,12 @@ Friend Class frmUI_ArdPicProgHost
         End If
     End Sub
     Private Sub ExportButton_Click(sender As System.Object, e As System.EventArgs) Handles ExportButton.Click
-        Dim strExportIntelHex As String = ":"
+        Dim strExportIntelHex As String = ""
+        If ((lDeviceName.Text = "PIC16F627A") Or (lDeviceName.Text = "PIC16F628A") Or (lDeviceName.Text = "PIC16F648A")) Then
+            'HEX386
+            strExportIntelHex = strExportIntelHex & ":020000040000FA" & vbCrLf
+        End If
+        strExportIntelHex = strExportIntelHex & ":"
         Dim intLineByteCounter As Integer = 0
         Dim intLineAddressCounter As Integer = 0
         Dim intChecksum As Integer = 0
@@ -466,7 +532,13 @@ Friend Class frmUI_ArdPicProgHost
         Dim strInByte As String = ""
         Dim tmpbByte As Char
         Dim intAddressOffset = 0
-        For Each bByte As Char In HexFileDump.Text
+        Dim HexFileDumpCrop As String = ""
+        If ((lDeviceName.Text = "PIC16F627A") Or (lDeviceName.Text = "PIC16F628A") Or (lDeviceName.Text = "PIC16F648A")) Then
+            HexFileDumpCrop = Replace(HexFileDump.Text, HexFileDump.Lines(0), "")
+        Else
+            HexFileDumpCrop = HexFileDump.Text
+        End If
+        For Each bByte As Char In HexFileDumpCrop
             If IsNumeric(bByte) Or (bByte >= "A" And bByte <= "F") Then
                 If intLineAddressCounter = 0 Then
                     intAddressOffset = 0
@@ -522,6 +594,53 @@ Friend Class frmUI_ArdPicProgHost
                 End If
             End If
         Next
+        If ((lDeviceName.Text = "PIC16F627A") Or (lDeviceName.Text = "PIC16F628A") Or (lDeviceName.Text = "PIC16F648A")) Then
+            ' First symbols of first line of dump (2000:)
+            Dim HexFileDumpFirstLine As String = HexFileDump.Lines(0).Replace(":", "").Replace(" ", "").Substring(0, 20)
+            For Each bByte As Char In HexFileDumpFirstLine
+                If intLineAddressCounter = 0 Then
+                    intAddressOffset = 0
+                    strExportIntelHex = strExportIntelHex & "08" 'add byte count
+                    intChecksum = 8 'set inital checksum
+                    strBaseAddress = bByte
+                    intLineAddressCounter += 1
+                ElseIf intLineAddressCounter < 4 Then
+                    intLineAddressCounter += 1
+                    strBaseAddress = strBaseAddress & bByte
+                ElseIf intLineByteCounter = 0 Then 'set record type
+                    intBaseAddress = (Val("&H" & strBaseAddress) << 1) + intAddressOffset
+                    intChecksum = intChecksum + (intBaseAddress >> 8) + (intBaseAddress And &HFF)
+                    strExportIntelHex = strExportIntelHex + Decimal2Hex(intBaseAddress) 'write address
+                    strExportIntelHex = strExportIntelHex & "00"
+                    strByte = ""
+                    ComputeChecksum(strByte, bByte, intChecksum)
+                    strInByte = bByte
+                    intInByteCount = 3
+                    intLineByteCounter += 1
+                ElseIf intLineByteCounter < 15 Then
+                    If intInByteCount = 3 Then
+                        strInByte = strInByte & bByte
+                        intInByteCount = 0
+                    ElseIf intInByteCount = 0 Then
+                        tmpbByte = bByte
+                        intInByteCount = 1
+                    ElseIf intInByteCount = 1 Then
+                        strExportIntelHex = strExportIntelHex & tmpbByte & bByte & strInByte
+                        intInByteCount = 2
+                    ElseIf intInByteCount = 2 Then
+                        strInByte = bByte
+                        intInByteCount = 3
+                    End If
+                    ComputeChecksum(strByte, bByte, intChecksum)
+                    intLineByteCounter += 1
+                ElseIf intLineByteCounter = 15 Then
+                    strExportIntelHex = strExportIntelHex & tmpbByte & bByte & strInByte
+                    ComputeChecksum(strByte, bByte, intChecksum)
+                    strExportIntelHex = strExportIntelHex & strChecksum(intChecksum) & vbCrLf
+                    strExportIntelHex = strExportIntelHex & ":"
+                End If
+            Next
+        End If
         ' add CONFIG-Word
         strExportIntelHex = strExportIntelHex & "02400E00"
         intChecksum = 80
@@ -586,6 +705,7 @@ Friend Class frmUI_ArdPicProgHost
             End If
         Next
         strExportIntelHex = strExportIntelHex & "00000001FF"
+
         ' output to file
         With dlgSaveFile
             .Filter = "Hexfiles (*.hex)|*.hex|All files (*.*)|*.*"

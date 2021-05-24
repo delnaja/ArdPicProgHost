@@ -8,3 +8,6 @@ A compelling alternative would be the use of an Arduino as in the ArdPicProg. Lo
 The complete setup and the application of the ArdPicProg is described in more detail on https://makerprojekte.de/en/arduino-pic-programmer/. This page also features a comprehensive User's Guide.
 
 One element of the ArdPicProg - tool chain is a host software. You can select between two options: the terminal program "PicProgTerm" or the "ArdPicProgHost" application for Windows with a graphical user interface. The source code for both programs can be found in respective repositories on github/makerprojects.
+
+Changes: 
+24.05.2021: PIC16F627A, PIC16F628A and PIC16F648A support added
