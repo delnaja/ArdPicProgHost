@@ -18,7 +18,7 @@
 ' of this code to your application and usage.
 ' 
 ' Documentation of changes:
-' Last change: 02/11/2018 : improved processing of PIC12F629, 630, 675 and 676
+' Last change: 02/11/2018 : improved processing of PIC12F629, PIC12F675, PIC16F630, and PIC16F676
 ' Last change: 01/26/2016 : migrated source to VB 2013 and fixed a bug in detecting a device
 ' Last change: 11/02/2014 : fixed bugs in COM detection
 ' Last change: 01/11/2014 : fixed bugs in Intel hex file export (checksum calculation, format for EEPROM data)
@@ -34,6 +34,7 @@ Option Explicit On
 ' arr(arr.Length - 1) = item
 ' End Sub
 ' End Module
+
 Friend Class frmUI_ArdPicProgHost
     Inherits System.Windows.Forms.Form
 
@@ -79,7 +80,6 @@ Friend Class frmUI_ArdPicProgHost
 
         boolErrorFlag = False
 
-        ' Connection setup - check for ports and display result
         ' Connection setup - check for ports and display result
         For Each sp As String In My.Computer.Ports.SerialPortNames
             myStringBuffer = ""
@@ -144,6 +144,7 @@ Friend Class frmUI_ArdPicProgHost
     End Sub
     Private Sub RetrieveDeviceParameters()
         Dim strChannelBuffer As String = ""
+        Dim flashType As String = ""
         Dim i As Integer = 1
         If mySerialLink.SerialLinkConnected() Then
             If Not boolErrorFlag Then
@@ -159,8 +160,15 @@ Friend Class frmUI_ArdPicProgHost
                     Call ParseForRange(lEEPROMRange.Text, intDataStart, intDataEnd)
                     Call ParseForArgument(strChannelBuffer, lConfigWord.Text, "ConfigWord")
                     Call ParseForArgument(strChannelBuffer, lConfigurationRange.Text, "ConfigRange")
+                    Call ParseForArgument(strChannelBuffer, lReservedRange.Text, "ReservedRange")
+                    'Call ParseForArgument(strChannelBuffer, flashType, "FlashType")
+                    'If flashType = "0000" Then
+                    'lFlashType.Text = "FLASH"
+                    'Else
+                    'lFlashType.Text = "FLASH" + flashType.Replace("000", "")
+                    'End If
                     Call ParseForRange(lConfigurationRange.Text, intConfigStart, intConfigEnd)
-                    If ((lDeviceName.Text = "PIC12F629") Or (lDeviceName.Text = "PIC12F675") Or (lDeviceName.Text = "PIC12F675") Or (lDeviceName.Text = "PIC12F676")) Then
+                    If ((lDeviceName.Text = "PIC12F629") Or (lDeviceName.Text = "PIC12F675") Or (lDeviceName.Text = "PIC16F630") Or (lDeviceName.Text = "PIC16F676")) Then
                         Call mySerialLink.SendDataToSerial("READ" & " " & "03FF" & vbCrLf)
                         Call mySerialLink.GetResponse(strProgramMemory, "." & vbCrLf)
                         If strProgramMemory <> "TimeOut" And strProgramMemory.Length = 13 Then
@@ -400,13 +408,26 @@ Friend Class frmUI_ArdPicProgHost
 
     Private Sub EraseButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles EraseButton.Click
         Dim strChannelBuffer As String = ""
+        Dim firmwareVersion As String = ""
         If boolDeviceFound Then
             Led2.Color = LED.LEDColorSelection.LED_Red
             Led2.Interval = 500
             Led2.Blink = True
             Status.Text = "Erasing"
             Me.Refresh()
-            Call mySerialLink.SendDataToSerial("ERASE" & vbCrLf)
+            'Call mySerialLink.SendDataToSerial("READ" & " " & "00A2" & vbCrLf)
+            'Call mySerialLink.GetResponse(firmwareVersion, "." & vbCrLf)
+            'Console.WriteLine(firmwareVersion)
+            'Read and save OSCCAL 
+            If ((lDeviceName.Text = "PIC12F629") Or (lDeviceName.Text = "PIC12F675") Or (lDeviceName.Text = "PIC16F630") Or (lDeviceName.Text = "PIC16F676")) Then
+                If mySerialLink.SerialLinkConnected() Then
+                    Call mySerialLink.SendDataToSerial("ERASE" & vbCrLf)
+                    Call mySerialLink.GetResponse(strChannelBuffer, vbCrLf)
+                    Call ParseForArgument(strChannelBuffer, lFlashType.Text, "GetReservedWord")
+                End If
+            Else
+                Call mySerialLink.SendDataToSerial("ERASE" & vbCrLf)
+            End If
             Call mySerialLink.GetResponse(strProgramMemory, "OK")
             If strChannelBuffer = "TimeOut" Then 'Error message 
                 MsgBox("Time out error erasing device - Please retry!", MessageBoxButtons.OK, "ArdPigProgHost: Communication time out")
@@ -447,6 +468,7 @@ Friend Class frmUI_ArdPicProgHost
                         Else
                             Call mySerialLink.SendDataToSerial(strCommandString)
                             Call mySerialLink.GetResponse(strChannelBuffer, "OK")
+                            'If memory is full
                             If (InStr(1, strChannelBuffer, "ERROR")) Then
                                 MsgBox("Write error to device - Please erase device first!", MessageBoxButtons.OK, "ArdPigProgHost: Write Error")
                                 Led2.Blink = False
@@ -472,6 +494,7 @@ Friend Class frmUI_ArdPicProgHost
             Next
             Call mySerialLink.SendDataToSerial(strCommandString) 'flush out last string
             Call mySerialLink.GetResponse(strChannelBuffer, "OK")
+            'If memory is empty
             If (InStr(1, strChannelBuffer, "ERROR")) Then
                 MsgBox("Write error to device - Please erase device first!", MessageBoxButtons.OK, "ArdPigProgHost: Write Error")
             Else
@@ -481,6 +504,7 @@ Friend Class frmUI_ArdPicProgHost
                     MsgBox("Write error to device - Failed to write Configuration Word!", MessageBoxButtons.OK, "ArdPigProgHost: Write Error")
                 End If
             End If
+            '0000 0000 0000 0000 ... 345C
             'update window after programming 
             Call UpdateMemoryWindows("Reading address ", "Reading EEPROM")
             Call mySerialLink.SendDataToSerial("DEVICE" & vbCrLf)

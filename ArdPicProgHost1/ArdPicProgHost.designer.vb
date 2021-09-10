@@ -30,6 +30,10 @@
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
         Me.tHeartBeat = New System.Windows.Forms.Timer(Me.components)
         Me.frmOuter = New System.Windows.Forms.GroupBox()
+        Me.lFlashType = New System.Windows.Forms.Label()
+        Me.Label6 = New System.Windows.Forms.Label()
+        Me.lReservedRange = New System.Windows.Forms.Label()
+        Me.Label5 = New System.Windows.Forms.Label()
         Me.lConfigurationRange = New System.Windows.Forms.Label()
         Me.Label4 = New System.Windows.Forms.Label()
         Me.lOsccal = New System.Windows.Forms.Label()
@@ -80,6 +84,10 @@
         'frmOuter
         '
         Me.frmOuter.BackColor = System.Drawing.SystemColors.Control
+        Me.frmOuter.Controls.Add(Me.lFlashType)
+        Me.frmOuter.Controls.Add(Me.Label6)
+        Me.frmOuter.Controls.Add(Me.lReservedRange)
+        Me.frmOuter.Controls.Add(Me.Label5)
         Me.frmOuter.Controls.Add(Me.lConfigurationRange)
         Me.frmOuter.Controls.Add(Me.Label4)
         Me.frmOuter.Controls.Add(Me.lOsccal)
@@ -98,10 +106,48 @@
         Me.frmOuter.Name = "frmOuter"
         Me.frmOuter.Padding = New System.Windows.Forms.Padding(0)
         Me.frmOuter.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.frmOuter.Size = New System.Drawing.Size(458, 127)
+        Me.frmOuter.Size = New System.Drawing.Size(458, 145)
         Me.frmOuter.TabIndex = 2
         Me.frmOuter.TabStop = False
         Me.frmOuter.Text = "Device"
+        '
+        'lFlashType
+        '
+        Me.lFlashType.AutoSize = True
+        Me.lFlashType.Font = New System.Drawing.Font("Arial", 10.0!)
+        Me.lFlashType.Location = New System.Drawing.Point(127, 112)
+        Me.lFlashType.Name = "lFlashType"
+        Me.lFlashType.Size = New System.Drawing.Size(0, 16)
+        Me.lFlashType.TabIndex = 24
+        '
+        'Label6
+        '
+        Me.Label6.AutoSize = True
+        Me.Label6.Font = New System.Drawing.Font("Arial", 10.0!)
+        Me.Label6.Location = New System.Drawing.Point(13, 112)
+        Me.Label6.Name = "Label6"
+        Me.Label6.Size = New System.Drawing.Size(82, 16)
+        Me.Label6.TabIndex = 23
+        Me.Label6.Text = "Flash Type:"
+        '
+        'lReservedRange
+        '
+        Me.lReservedRange.AutoSize = True
+        Me.lReservedRange.Font = New System.Drawing.Font("Arial", 10.0!)
+        Me.lReservedRange.Location = New System.Drawing.Point(365, 111)
+        Me.lReservedRange.Name = "lReservedRange"
+        Me.lReservedRange.Size = New System.Drawing.Size(0, 16)
+        Me.lReservedRange.TabIndex = 22
+        '
+        'Label5
+        '
+        Me.Label5.AutoSize = True
+        Me.Label5.Font = New System.Drawing.Font("Arial", 10.0!)
+        Me.Label5.Location = New System.Drawing.Point(230, 112)
+        Me.Label5.Name = "Label5"
+        Me.Label5.Size = New System.Drawing.Size(119, 16)
+        Me.Label5.TabIndex = 12
+        Me.Label5.Text = "Reserved Range:"
         '
         'lConfigurationRange
         '
@@ -263,11 +309,11 @@
         Me.GroupBox7.Controls.Add(Me.WriteButton)
         Me.GroupBox7.Font = New System.Drawing.Font("Arial", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.GroupBox7.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.GroupBox7.Location = New System.Drawing.Point(16, 146)
+        Me.GroupBox7.Location = New System.Drawing.Point(16, 164)
         Me.GroupBox7.Name = "GroupBox7"
         Me.GroupBox7.Padding = New System.Windows.Forms.Padding(0)
         Me.GroupBox7.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.GroupBox7.Size = New System.Drawing.Size(740, 69)
+        Me.GroupBox7.Size = New System.Drawing.Size(740, 71)
         Me.GroupBox7.TabIndex = 19
         Me.GroupBox7.TabStop = False
         Me.GroupBox7.Text = "Programmer"
@@ -416,11 +462,11 @@
         Me.GroupBox2.Controls.Add(Me.Led2)
         Me.GroupBox2.Font = New System.Drawing.Font("Arial", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.GroupBox2.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.GroupBox2.Location = New System.Drawing.Point(486, 85)
+        Me.GroupBox2.Location = New System.Drawing.Point(486, 97)
         Me.GroupBox2.Name = "GroupBox2"
         Me.GroupBox2.Padding = New System.Windows.Forms.Padding(0)
         Me.GroupBox2.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.GroupBox2.Size = New System.Drawing.Size(270, 55)
+        Me.GroupBox2.Size = New System.Drawing.Size(270, 61)
         Me.GroupBox2.TabIndex = 21
         Me.GroupBox2.TabStop = False
         Me.GroupBox2.Text = "Status"
@@ -459,11 +505,11 @@
         Me.GroupBox3.Controls.Add(Me.HexFileDump)
         Me.GroupBox3.Font = New System.Drawing.Font("Arial", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.GroupBox3.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.GroupBox3.Location = New System.Drawing.Point(16, 220)
+        Me.GroupBox3.Location = New System.Drawing.Point(16, 241)
         Me.GroupBox3.Name = "GroupBox3"
         Me.GroupBox3.Padding = New System.Windows.Forms.Padding(0)
         Me.GroupBox3.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.GroupBox3.Size = New System.Drawing.Size(740, 197)
+        Me.GroupBox3.Size = New System.Drawing.Size(740, 193)
         Me.GroupBox3.TabIndex = 20
         Me.GroupBox3.TabStop = False
         Me.GroupBox3.Text = "Program memory"
@@ -489,11 +535,11 @@
         Me.GroupBox5.Controls.Add(Me.EEPROMDump)
         Me.GroupBox5.Font = New System.Drawing.Font("Arial", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.GroupBox5.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.GroupBox5.Location = New System.Drawing.Point(16, 421)
+        Me.GroupBox5.Location = New System.Drawing.Point(16, 440)
         Me.GroupBox5.Name = "GroupBox5"
         Me.GroupBox5.Padding = New System.Windows.Forms.Padding(0)
         Me.GroupBox5.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.GroupBox5.Size = New System.Drawing.Size(482, 102)
+        Me.GroupBox5.Size = New System.Drawing.Size(482, 121)
         Me.GroupBox5.TabIndex = 21
         Me.GroupBox5.TabStop = False
         Me.GroupBox5.Text = "EEPROM"
@@ -501,12 +547,12 @@
         'EEPROMDump
         '
         Me.EEPROMDump.Font = New System.Drawing.Font("Courier New", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.EEPROMDump.Location = New System.Drawing.Point(13, 22)
+        Me.EEPROMDump.Location = New System.Drawing.Point(12, 22)
         Me.EEPROMDump.Multiline = True
         Me.EEPROMDump.Name = "EEPROMDump"
         Me.EEPROMDump.ReadOnly = True
         Me.EEPROMDump.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
-        Me.EEPROMDump.Size = New System.Drawing.Size(459, 64)
+        Me.EEPROMDump.Size = New System.Drawing.Size(459, 86)
         Me.EEPROMDump.TabIndex = 15
         '
         'frmUI_ArdPicProgHost
@@ -515,7 +561,7 @@
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi
         Me.AutoSize = True
         Me.BackColor = System.Drawing.SystemColors.Control
-        Me.ClientSize = New System.Drawing.Size(767, 535)
+        Me.ClientSize = New System.Drawing.Size(767, 573)
         Me.Controls.Add(Me.GroupBox5)
         Me.Controls.Add(Me.GroupBox3)
         Me.Controls.Add(Me.GroupBox2)
@@ -582,5 +628,9 @@
     Public WithEvents GroupBox5 As System.Windows.Forms.GroupBox
     Friend WithEvents EEPROMDump As System.Windows.Forms.TextBox
     Friend WithEvents dlgSaveFile As System.Windows.Forms.SaveFileDialog
+    Friend WithEvents Label5 As System.Windows.Forms.Label
+    Friend WithEvents lReservedRange As System.Windows.Forms.Label
+    Friend WithEvents Label6 As System.Windows.Forms.Label
+    Friend WithEvents lFlashType As System.Windows.Forms.Label
 #End Region
 End Class

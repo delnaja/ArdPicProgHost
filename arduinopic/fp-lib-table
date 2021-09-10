@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name DS01-254-L-04BE)(type KiCad)(uri ${KIPRJMOD}/DS01-254-L-04BE)(options "")(descr ""))
+)

@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name DS01-254-L-04BE)(type Legacy)(uri ${KIPRJMOD}/DS01-254-L-04BE/DS01-254-L-04BE.lib)(options "")(descr ""))
+  (lib (name arduinopic-rescue)(type Legacy)(uri ${KIPRJMOD}/arduinopic-rescue.lib)(options "")(descr ""))
+)
