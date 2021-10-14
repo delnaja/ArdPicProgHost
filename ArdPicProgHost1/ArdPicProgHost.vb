@@ -161,12 +161,12 @@ Friend Class frmUI_ArdPicProgHost
                     Call ParseForArgument(strChannelBuffer, lConfigWord.Text, "ConfigWord")
                     Call ParseForArgument(strChannelBuffer, lConfigurationRange.Text, "ConfigRange")
                     Call ParseForArgument(strChannelBuffer, lReservedRange.Text, "ReservedRange")
-                    'Call ParseForArgument(strChannelBuffer, flashType, "FlashType")
-                    'If flashType = "0000" Then
-                    'lFlashType.Text = "FLASH"
-                    'Else
-                    'lFlashType.Text = "FLASH" + flashType.Replace("000", "")
-                    'End If
+                    Call ParseForArgument(strChannelBuffer, flashType, "FlashType")
+                    If flashType = "0000" Then
+                        lFlashType.Text = "FLASH"
+                    Else
+                        lFlashType.Text = "FLASH" + flashType.Replace("000", "")
+                    End If
                     Call ParseForRange(lConfigurationRange.Text, intConfigStart, intConfigEnd)
                     If ((lDeviceName.Text = "PIC12F629") Or (lDeviceName.Text = "PIC12F675") Or (lDeviceName.Text = "PIC16F630") Or (lDeviceName.Text = "PIC16F676")) Then
                         Call mySerialLink.SendDataToSerial("READ" & " " & "03FF" & vbCrLf)
@@ -333,36 +333,61 @@ Friend Class frmUI_ArdPicProgHost
             End While
         End If
         intMemAdress = intProgramStart
-        While (intMemAdress < intProgramEnd)
-            Call mySerialLink.SendDataToSerial("READ" & " " & Decimal2Hex(intMemAdress) & "-" & Decimal2Hex(intMemAdress + 15) & vbCrLf)
-            Call mySerialLink.GetResponse(strProgramMemory, "." & vbCrLf)
-            ' Added against garbage
-            Dim subs4 = strProgramMemory.Substring(4, intCharsPerLine)
-            Dim comparison4 As String = subs4.Replace(vbCr, "").Replace(vbLf, "")
-            Dim subs45 = strProgramMemory.Substring(45, intCharsPerLine)
-            Dim comparison45 As String = subs45.Replace(vbCr, "").Replace(vbLf, "")
-            If strProgramMemory <> "TimeOut" And strProgramMemory.Length = 89 Then
+        If ((lDeviceName.Text = "PIC16F627A") Or (lDeviceName.Text = "PIC16F628A") Or (lDeviceName.Text = "PIC16F648A")) Then
+            While (intMemAdress < intProgramEnd)
+                Call mySerialLink.SendDataToSerial("READ" & " " & Decimal2Hex(intMemAdress) & "-" & Decimal2Hex(intMemAdress + 15) & vbCrLf)
+                Call mySerialLink.GetResponse(strProgramMemory, "." & vbCrLf)
                 ' Added against garbage
-                If comparison4 <> "3FFF 3FFF 3FFF 3FFF 3FFF 3FFF 3FFF 3FFF" And comparison45 <> "3FFF 3FFF 3FFF 3FFF 3FFF 3FFF 3FFF 3FFF" Then
-                    HexFileDump.Text = HexFileDump.Text & Decimal2Hex(intMemAdress) & ": " & subs4 & " "
-                    HexFileDump.Text = HexFileDump.Text & subs45 & vbCrLf
-                End If
-                intMemAdress += 16 'address for next line
-                intRefreshCounter += 1
-                If intRefreshCounter = 4 Then
-                    If intUpdateWindow > 0 Then
-                        Me.HexFileDump.Refresh()
-                        intUpdateWindow -= 1
+                Dim subs4 = strProgramMemory.Substring(4, intCharsPerLine)
+                Dim comparison4 As String = subs4.Replace(vbCr, "").Replace(vbLf, "")
+                Dim subs45 = strProgramMemory.Substring(45, intCharsPerLine)
+                Dim comparison45 As String = subs45.Replace(vbCr, "").Replace(vbLf, "")
+                If strProgramMemory <> "TimeOut" And strProgramMemory.Length = 89 Then
+                    ' Added against garbage
+                    If comparison4 <> "3FFF 3FFF 3FFF 3FFF 3FFF 3FFF 3FFF 3FFF" And comparison45 <> "3FFF 3FFF 3FFF 3FFF 3FFF 3FFF 3FFF 3FFF" Then
+                        HexFileDump.Text = HexFileDump.Text & Decimal2Hex(intMemAdress) & ": " & subs4 & " "
+                        HexFileDump.Text = HexFileDump.Text & subs45 & vbCrLf
                     End If
-                    intRefreshCounter = 0
-                    Led2.State = boolLedStatus
-                    boolLedStatus = Not boolLedStatus
-                    Status.Text = sMemMessage & Decimal2Hex(intMemAdress)
-                    Me.Led2.Refresh()
-                    Me.Status.Refresh()
+                    intMemAdress += 16 'address for next line
+                    intRefreshCounter += 1
+                    If intRefreshCounter = 4 Then
+                        If intUpdateWindow > 0 Then
+                            Me.HexFileDump.Refresh()
+                            intUpdateWindow -= 1
+                        End If
+                        intRefreshCounter = 0
+                        Led2.State = boolLedStatus
+                        boolLedStatus = Not boolLedStatus
+                        Status.Text = sMemMessage & Decimal2Hex(intMemAdress)
+                        Me.Led2.Refresh()
+                        Me.Status.Refresh()
+                    End If
                 End If
-            End If
-        End While
+            End While
+        Else
+            While (intMemAdress < intProgramEnd)
+                Call mySerialLink.SendDataToSerial("READ" & " " & Decimal2Hex(intMemAdress) & "-" & Decimal2Hex(intMemAdress + 15) & vbCrLf)
+                Call mySerialLink.GetResponse(strProgramMemory, "." & vbCrLf)
+                If strProgramMemory <> "TimeOut" And strProgramMemory.Length = 89 Then
+                    HexFileDump.Text = HexFileDump.Text & Decimal2Hex(intMemAdress) & ": " & strProgramMemory.Substring(4, intCharsPerLine) & " "
+                    HexFileDump.Text = HexFileDump.Text & strProgramMemory.Substring(45, intCharsPerLine) & vbCrLf
+                    intMemAdress += 16 'address for next line
+                    intRefreshCounter += 1
+                    If intRefreshCounter = 4 Then
+                        If intUpdateWindow > 0 Then
+                            Me.HexFileDump.Refresh()
+                            intUpdateWindow -= 1
+                        End If
+                        intRefreshCounter = 0
+                        Led2.State = boolLedStatus
+                        boolLedStatus = Not boolLedStatus
+                        Status.Text = sMemMessage & Decimal2Hex(intMemAdress)
+                        Me.Led2.Refresh()
+                        Me.Status.Refresh()
+                    End If
+                End If
+            End While
+        End If
         Status.Text = sEEPMessage
         Me.Status.Refresh()
         Call mySerialLink.SendDataToSerial("READ" & " " & lEEPROMRange.Text & vbCrLf)
@@ -415,9 +440,6 @@ Friend Class frmUI_ArdPicProgHost
             Led2.Blink = True
             Status.Text = "Erasing"
             Me.Refresh()
-            'Call mySerialLink.SendDataToSerial("READ" & " " & "00A2" & vbCrLf)
-            'Call mySerialLink.GetResponse(firmwareVersion, "." & vbCrLf)
-            'Console.WriteLine(firmwareVersion)
             'Read and save OSCCAL 
             If ((lDeviceName.Text = "PIC12F629") Or (lDeviceName.Text = "PIC12F675") Or (lDeviceName.Text = "PIC16F630") Or (lDeviceName.Text = "PIC16F676")) Then
                 If mySerialLink.SerialLinkConnected() Then
