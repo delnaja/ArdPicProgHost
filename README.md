@@ -11,3 +11,4 @@ One element of the ArdPicProg - tool chain is a host software. You can select be
 
 Changes: 
 24.05.2021: PIC16F627A, PIC16F628A and PIC16F648A support added
+14.10.2021: PIC12F629, PIC12F675 support added – 5V PIC_VDD power supply via D2 arduino pin. OSCCAL is overwritten 

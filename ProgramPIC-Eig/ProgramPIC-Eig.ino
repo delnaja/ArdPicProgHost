@@ -1359,6 +1359,7 @@ bool writeWord(unsigned long addr, unsigned int word)
         // must be preserved when we write to it.  Read the current value
         // and preserve the necessary bits.
         readBack = (sendReadCommand(CMD_READ_PROGRAM_MEMORY) >> 1) & 0x3FFF;
+        word = (readBack & configSave) | (word & 0x3FFF & ~configSave);
         sendWriteCommand(CMD_LOAD_PROGRAM_MEMORY, word << 1);
         beginProgramCycle(addr, false);
         readBack = sendReadCommand(CMD_READ_PROGRAM_MEMORY);
